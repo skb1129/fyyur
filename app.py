@@ -46,6 +46,10 @@ app.jinja_env.filters['datetime'] = format_datetime
 
 @app.route('/')
 def index():
+    """
+    Render home page
+    :return: Home page
+    """
     return render_template('pages/home.html')
 
 
@@ -54,6 +58,10 @@ def index():
 
 @app.route('/venues')
 def venues():
+    """
+    Render venues list page
+    :return: Venues list page
+    """
     data = [venue.local for venue in
             Venue.query.distinct(Venue.city, Venue.state).all()]
     for location in data:
@@ -65,6 +73,10 @@ def venues():
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
+    """
+    Render venues based on the search term
+    :return: Searched venues page
+    """
     search = request.form.get('search_term', '')
     data = Venue.query.filter(Venue.name.ilike("%" + search + "%")).all()
     response = {
@@ -77,6 +89,11 @@ def search_venues():
 
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
+    """
+    Render venue page based on venue id
+    :param venue_id: Id of the venue to be displayed
+    :return: Venue page
+    """
     venue = Venue.query.filter_by(id=venue_id).first_or_404()
     return render_template('pages/show_venue.html', venue=venue)
 
@@ -86,12 +103,20 @@ def show_venue(venue_id):
 
 @app.route('/venues/create', methods=['GET'])
 def create_venue_form():
+    """
+    Render form to create venue
+    :return: New venue form page
+    """
     form = VenueForm()
     return render_template('forms/new_venue.html', form=form)
 
 
 @app.route('/venues/create', methods=['POST'])
 def create_venue_submission():
+    """
+    Create a new venue in database
+    :return: Home page
+    """
     form = VenueForm(request.form)
 
     try:
@@ -119,6 +144,11 @@ def create_venue_submission():
 
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
+    """
+    Delete venue from database
+    :param venue_id: Id of venue to be deleted
+    :return: None
+    """
     try:
         venue = Venue.query.filter_by(id=venue_id).first_or_404()
         db.session.delete(venue)
@@ -135,12 +165,20 @@ def delete_venue(venue_id):
 #  ----------------------------------------------------------------
 @app.route('/artists')
 def artists():
+    """
+    Render artists list page
+    :return: Artists list page
+    """
     data = Artist.query.all()
     return render_template('pages/artists.html', artists=data)
 
 
 @app.route('/artists/search', methods=['POST'])
 def search_artists():
+    """
+    Render artists based on the search term
+    :return: Searched artists page
+    """
     search = request.form.get('search_term', '')
     artists = Artist.query.filter(Artist.name.ilike("%" + search + "%")).all()
     response = {
@@ -153,6 +191,11 @@ def search_artists():
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
+    """
+    Render artist page based on artist id
+    :param artist_id: Id of the artist to be displayed
+    :return: Artist page
+    """
     data = Artist.query.filter_by(id=artist_id).first_or_404()
     return render_template('pages/show_artist.html', artist=data)
 
@@ -161,6 +204,11 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+    """
+    Render form to edit artist
+    :param artist_id: Id of the artist to be edited
+    :return: Edit artist form page
+    """
     form = ArtistForm(request.form)
     artist = Artist.query.filter_by(id=artist_id).first_or_404()
     return render_template('forms/edit_artist.html', form=form, artist=artist)
@@ -168,6 +216,11 @@ def edit_artist(artist_id):
 
 @app.route('/artists/<int:artist_id>/edit', methods=['POST'])
 def edit_artist_submission(artist_id):
+    """
+    Update the artist in database
+    :param artist_id: Id of the artist to be updated
+    :return: Redirect to the artist's page
+    """
     form = ArtistForm(request.form)
     try:
         artist = Artist.query.filter_by(id=artist_id).first_or_404()
@@ -191,6 +244,11 @@ def edit_artist_submission(artist_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
 def edit_venue(venue_id):
+    """
+    Render form to edit venue
+    :param venue_id: Id of the venue to be edited
+    :return: Edit venue form page
+    """
     form = VenueForm(request.form)
     venue = Venue.query.filter_by(id=venue_id).first_or_404()
     return render_template('forms/edit_venue.html', form=form, venue=venue)
@@ -198,6 +256,11 @@ def edit_venue(venue_id):
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
 def edit_venue_submission(venue_id):
+    """
+    Update the venue in database
+    :param venue_id: Id of the venue to be updated
+    :return: Redirect to the venue's page
+    """
     form = VenueForm(request.form)
     try:
         venue = Venue.query.filter_by(id=venue_id).first_or_404()
@@ -224,12 +287,20 @@ def edit_venue_submission(venue_id):
 
 @app.route('/artists/create', methods=['GET'])
 def create_artist_form():
+    """
+    Render form to create artist
+    :return: New artist form page
+    """
     form = ArtistForm()
     return render_template('forms/new_artist.html', form=form)
 
 
 @app.route('/artists/create', methods=['POST'])
 def create_artist_submission():
+    """
+    Create a new artist in database
+    :return: Home page
+    """
     form = ArtistForm(request.form)
     try:
         new_artist = Artist(
@@ -258,18 +329,30 @@ def create_artist_submission():
 
 @app.route('/shows')
 def shows():
+    """
+    Render the shows list page
+    :return: Shows list page
+    """
     data = [show.complete for show in Show.query.all()]
     return render_template('pages/shows.html', shows=data)
 
 
 @app.route('/shows/create')
 def create_shows():
+    """
+    Render form to create show
+    :return: New show form page
+    """
     form = ShowForm()
     return render_template('forms/new_show.html', form=form)
 
 
 @app.route('/shows/create', methods=['POST'])
 def create_show_submission():
+    """
+    Create a new show in database
+    :return: Home page
+    """
     form = ShowForm(request.form)
     try:
         new_show = Show(

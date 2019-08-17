@@ -4,13 +4,15 @@ from flask_sqlalchemy import SQLAlchemy
 
 import config
 
-database_name = 'trivia'
-database_path = f'postgresql://localhost:5432/{database_name}'
-
 db = SQLAlchemy()
 
 
 def setup_db(app):
+    """
+    Configures and connects the flask application to database
+    Initiates all the tables
+    :param app: Flask app
+    """
     app.config.from_object(config)
     db.app = app
     db.init_app(app)
