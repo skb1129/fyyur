@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from flask_sqlalchemy import SQLAlchemy
 
 import config
@@ -41,6 +43,38 @@ class Venue(db.Model):
             'state': self.state,
         }
 
+    @property
+    def past_shows(self):
+        shows = Show.query.filter(
+            Show.start_time < datetime.now(),
+            Show.venue_id == self.id).all()
+        return [{
+            'artist_id': show.artist.id,
+            'artist_name': show.artist.name,
+            'artist_image_link': show.artist.image_link,
+            'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+        } for show in shows]
+
+    @property
+    def past_shows_count(self):
+        return len(self.past_shows)
+
+    @property
+    def upcoming_shows(self):
+        shows = Show.query.filter(
+            Show.start_time > datetime.now(),
+            Show.venue_id == self.id).all()
+        return [{
+            'artist_id': show.artist.id,
+            'artist_name': show.artist.name,
+            'artist_image_link': show.artist.image_link,
+            'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+        } for show in shows]
+
+    @property
+    def upcoming_shows_count(self):
+        return len(self.upcoming_shows)
+
 
 class Artist(db.Model):
     __tablename__ = 'Artist'
@@ -55,6 +89,38 @@ class Artist(db.Model):
     facebook_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean)
     seeking_description = db.Column(db.String)
+
+    @property
+    def past_shows(self):
+        shows = Show.query.filter(
+            Show.start_time < datetime.now(),
+            Show.artist_id == self.id).all()
+        return [{
+            'venue_id': show.venue.id,
+            'venue_name': show.venue.name,
+            'venue_image_link': show.venue.image_link,
+            'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+        } for show in shows]
+
+    @property
+    def past_shows_count(self):
+        return len(self.past_shows)
+
+    @property
+    def upcoming_shows(self):
+        shows = Show.query.filter(
+            Show.start_time > datetime.now(),
+            Show.artist_id == self.id).all()
+        return [{
+            'venue_id': show.venue.id,
+            'venue_name': show.venue.name,
+            'venue_image_link': show.venue.image_link,
+            'start_time': show.start_time.strftime("%m/%d/%Y, %H:%M")
+        } for show in shows]
+
+    @property
+    def upcoming_shows_count(self):
+        return len(self.upcoming_shows)
 
 
 class Show(db.Model):
