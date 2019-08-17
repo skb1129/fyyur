@@ -20,8 +20,8 @@ from forms import *
 # ----------------------------------------------------------------------------#
 
 app = Flask(__name__)
-moment = Moment(app)
 app.config.from_object(config)
+moment = Moment(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -173,14 +173,13 @@ def create_venue_submission():
             address=form.address.data,
             phone=form.phone.data,
             image_link=form.image_link.data,
-            genres=form.genres.data,
             facebook_link=form.facebook_link.data
         )
         db.session.add(new_venue)
         db.session.commit()
-        flash(f"Venue {form.name} was successfully listed!")
+        flash(f"Venue {form.name.data} was successfully listed!")
     except Exception:
-        flash(f"An error occurred. Venue {form.name} could not be listed.")
+        flash(f"An error occurred. Venue {form.name.data} could not be listed.")
 
     return render_template('pages/home.html')
 
@@ -247,9 +246,10 @@ def edit_artist_submission(artist_id):
         artist.image_link = form.image_link.data
         artist.facebook_link = form.facebook_link.data
         db.session.commit()
-        flash('Artist {form.name.data} was successfully edited!')
+        flash(f'Artist {form.name.data} was successfully edited!')
     except Exception:
-        flash(f'An error occurred. Artist {form.name} could not be listed.')
+        flash(
+            f'An error occurred. Artist {form.name.data} could not be edited.')
 
     return redirect(url_for('show_artist', artist_id=artist_id))
 
@@ -276,7 +276,7 @@ def edit_venue_submission(venue_id):
         db.session.commit()
         flash(f'Venue {form.name.data} was successfully edited!')
     except Exception:
-        flash(f'An error occurred. Venue {form.name} could not be listed.')
+        flash(f'An error occurred. Venue {form.name.data} could not be edited.')
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
@@ -306,7 +306,8 @@ def create_artist_submission():
         db.session.commit()
         flash(f'Artist {form.name.data} was successfully listed!')
     except Exception:
-        flash(f'An error occurred. Artist {form.name} could not be listed.')
+        flash(
+            f'An error occurred. Artist {form.name.data} could not be listed.')
 
     return render_template('pages/home.html')
 
