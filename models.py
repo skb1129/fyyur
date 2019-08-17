@@ -134,3 +134,14 @@ class Show(db.Model):
     venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
     venue = db.relationship('Venue',
                             backref=db.backref('shows', cascade="all,delete"))
+
+    @property
+    def complete(self):
+        return {
+            "venue_id": self.venue_id,
+            "venue_name": self.venue.name,
+            "artist_id": self.artist_id,
+            "artist_name": self.artist.name,
+            "artist_image_link": self.artist.image_link,
+            "start_time": self.start_time.strftime("%m/%d/%Y, %H:%M")
+        }
