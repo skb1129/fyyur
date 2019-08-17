@@ -10,86 +10,18 @@ import dateutil.parser
 from flask import flash, Flask, redirect, render_template, request, url_for
 from flask_migrate import Migrate
 from flask_moment import Moment
-from flask_sqlalchemy import SQLAlchemy
 
-import config
 from forms import *
+from models import Artist, db, setup_db, Show, Venue
 
 # ----------------------------------------------------------------------------#
 # App Config.
 # ----------------------------------------------------------------------------#
 
 app = Flask(__name__)
-app.config.from_object(config)
+setup_db(app)
 moment = Moment(app)
-db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-
-
-# ----------------------------------------------------------------------------#
-# Models.
-# ----------------------------------------------------------------------------#
-
-class Venue(db.Model):
-    __tablename__ = 'Venue'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-    @property
-    def local(self):
-        return {
-            'city': self.city,
-            'state': self.state,
-        }
-
-    @property
-    def format(self):
-        return {
-            'id': self.id,
-            'name': self.name,
-            'city': self.city,
-            'state': self.state,
-            'address': self.address,
-            'phone': self.phone,
-            'image_link': self.image_link,
-            'facebook_link': self.facebook_link,
-        }
-
-
-class Artist(db.Model):
-    __tablename__ = 'Artist'
-
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String)
-    city = db.Column(db.String(120))
-    state = db.Column(db.String(120))
-    phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
-    image_link = db.Column(db.String(500))
-    facebook_link = db.Column(db.String(120))
-
-
-class Show(db.Model):
-    __tablename__ = 'Show'
-    id = db.Column(db.Integer, primary_key=True)
-    start_time = db.Column(db.DateTime())
-    artist_id = db.Column(db.Integer, db.ForeignKey('Artist.id'),
-                          nullable=False)
-    artist = db.relationship('Artist',
-                             backref=db.backref('shows', cascade="all,delete"))
-    venue_id = db.Column(db.Integer, db.ForeignKey('Venue.id'), nullable=False)
-    venue = db.relationship('Venue',
-                            backref=db.backref('shows', cascade="all,delete"))
-
-
-db.create_all()
 
 
 # ----------------------------------------------------------------------------#
@@ -125,18 +57,16 @@ def venues():
     data = [venue.local for venue in
             Venue.query.distinct(Venue.city, Venue.state).all()]
     for location in data:
-        location["venues"] = [venue.format for venue in
-                              Venue.query.filter(
-                                  Venue.city == location["city"],
-                                  Venue.state == location["state"])]
+        location["venues"] = Venue.query.filter_by(
+            city=location["city"],
+            state=location["state"])
     return render_template('pages/venues.html', areas=data)
 
 
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
     search = request.form.get('search_term', '')
-    data = [venue.format for venue in
-            Venue.query.filter(Venue.name.ilike("%" + search + "%")).all()]
+    data = Venue.query.filter(Venue.name.ilike("%" + search + "%")).all()
     response = {
         "count": len(data),
         "data": data
@@ -148,8 +78,7 @@ def search_venues():
 @app.route('/venues/<int:venue_id>')
 def show_venue(venue_id):
     venue = Venue.query.filter_by(id=venue_id).first_or_404()
-    data = venue.format
-    return render_template('pages/show_venue.html', venue=data)
+    return render_template('pages/show_venue.html', venue=venue)
 
 
 #  Create Venue
@@ -172,6 +101,7 @@ def create_venue_submission():
             state=form.state.data,
             address=form.address.data,
             phone=form.phone.data,
+            genres=form.genres.data,
             image_link=form.image_link.data,
             facebook_link=form.facebook_link.data
         )
@@ -179,7 +109,8 @@ def create_venue_submission():
         db.session.commit()
         flash(f"Venue {form.name.data} was successfully listed!")
     except Exception:
-        flash(f"An error occurred. Venue {form.name.data} could not be listed.")
+        flash(
+            f"An error occurred. Venue {form.name.data} could not be listed.")
 
     return render_template('pages/home.html')
 
@@ -271,12 +202,14 @@ def edit_venue_submission(venue_id):
         venue.state = form.state.data
         venue.address = form.address.data
         venue.phone = form.phone.data
+        venue.genres = form.genres.data
         venue.image_link = form.image_link.data
         venue.facebook_link = form.facebook_link.data
         db.session.commit()
         flash(f'Venue {form.name.data} was successfully edited!')
     except Exception:
-        flash(f'An error occurred. Venue {form.name.data} could not be edited.')
+        flash(
+            f'An error occurred. Venue {form.name.data} could not be edited.')
     return redirect(url_for('show_venue', venue_id=venue_id))
 
 
