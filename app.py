@@ -103,7 +103,9 @@ def create_venue_submission():
             phone=form.phone.data,
             genres=form.genres.data,
             image_link=form.image_link.data,
-            facebook_link=form.facebook_link.data
+            facebook_link=form.facebook_link.data,
+            seeking_talent=form.seeking_talent.data,
+            seeking_description=form.seeking_description.data
         )
         db.session.add(new_venue)
         db.session.commit()
@@ -176,6 +178,8 @@ def edit_artist_submission(artist_id):
         artist.genres = form.genres.data
         artist.image_link = form.image_link.data
         artist.facebook_link = form.facebook_link.data
+        artist.seeking_venue = form.seeking_venue.data
+        artist.seeking_description = form.seeking_description.data
         db.session.commit()
         flash(f'Artist {form.name.data} was successfully edited!')
     except Exception:
@@ -205,6 +209,8 @@ def edit_venue_submission(venue_id):
         venue.genres = form.genres.data
         venue.image_link = form.image_link.data
         venue.facebook_link = form.facebook_link.data
+        venue.seeking_talent = form.seeking_talent.data
+        venue.seeking_description = form.seeking_description.data
         db.session.commit()
         flash(f'Venue {form.name.data} was successfully edited!')
     except Exception:
@@ -234,6 +240,8 @@ def create_artist_submission():
             genres=form.genres.data,
             image_link=form.image_link.data,
             facebook_link=form.facebook_link.data,
+            seeking_venue=form.seeking_venue.data,
+            seeking_description=form.seeking_description.data
         )
         db.session.add(new_artist)
         db.session.commit()
